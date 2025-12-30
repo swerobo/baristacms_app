@@ -45,8 +45,6 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
-
-	<!-- Azure AD OAuth URL Scheme -->
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -54,27 +52,33 @@
 			<string>com.baristacms.baristacmsApp</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>msal2603d090-e517-46d9-ab77-deb02d5964ca</string>
-				<string>msauth</string>
+				<string>msauth.com.baristacms.baristacmsApp</string>
 			</array>
 		</dict>
 	</array>
-
-	<!-- Allow Azure AD authentication in browser -->
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>msauthv2</string>
 		<string>msauthv3</string>
 	</array>
-
-	<!-- Camera Permission for Barcode Scanner -->
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+		<key>NSExceptionDomains</key>
+		<dict>
+			<key>localhost</key>
+			<dict>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<true/>
+			</dict>
+		</dict>
+	</dict>
 	<key>NSCameraUsageDescription</key>
-	<string>BaristaCMS needs camera access to scan barcodes for quick record lookup.</string>
-
-	<!-- Keychain Sharing for Secure Storage -->
-	<key>keychain-access-groups</key>
-	<array>
-		<string>$(AppIdentifierPrefix)com.baristacms.baristacmsApp</string>
-	</array>
+	<string>BaristaCMS needs camera access to scan barcodes and take photos for records.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>BaristaCMS needs access to your photo library to attach images to records.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>BaristaCMS needs permission to save photos to your library.</string>
 </dict>
 </plist>

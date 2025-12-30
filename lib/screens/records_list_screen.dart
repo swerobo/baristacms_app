@@ -74,7 +74,7 @@ class _RecordsListScreenState extends State<RecordsListScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(module?.displayName ?? 'Records'),
-        backgroundColor: Colors.blue.shade700,
+        backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Colors.white,
         actions: [
           IconButton(
@@ -92,7 +92,7 @@ class _RecordsListScreenState extends State<RecordsListScreen> {
           // Search Bar with Barcode Scanner
           Container(
             padding: const EdgeInsets.all(16),
-            color: Colors.grey.shade100,
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
             child: Row(
               children: [
                 Expanded(
@@ -115,7 +115,7 @@ class _RecordsListScreenState extends State<RecordsListScreen> {
                         borderSide: BorderSide.none,
                       ),
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: Theme.of(context).colorScheme.surface,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 12,
@@ -129,7 +129,7 @@ class _RecordsListScreenState extends State<RecordsListScreen> {
                 const SizedBox(width: 12),
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.blue.shade700,
+                    color: Theme.of(context).colorScheme.primary,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: IconButton(
@@ -227,7 +227,7 @@ class _RecordsListScreenState extends State<RecordsListScreen> {
             arguments: {'moduleName': _moduleName, 'recordId': null},
           );
         },
-        backgroundColor: Colors.blue.shade700,
+        backgroundColor: Theme.of(context).colorScheme.primary,
         child: const Icon(Icons.add, color: Colors.white),
       ),
     );

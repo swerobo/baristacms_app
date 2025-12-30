@@ -65,7 +65,7 @@ class _RecordEditScreenState extends State<RecordEditScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_isNew ? 'New Record' : 'Edit Record'),
-        backgroundColor: Colors.blue.shade700,
+        backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Colors.white,
         actions: [
           TextButton(

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
 import '../providers/module_provider.dart';
-import '../widgets/app_drawer.dart';
+import '../widgets/app_drawer.dart' show AppDrawer, getIconForModule;
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -29,7 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('BaristaCMS'),
-        backgroundColor: Colors.blue.shade700,
+        backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Colors.white,
         actions: [
           IconButton(
@@ -45,23 +45,46 @@ class _HomeScreenState extends State<HomeScreen> {
             ? const Center(child: CircularProgressIndicator())
             : moduleProvider.error != null
                 ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.error_outline,
-                            size: 64, color: Colors.grey.shade400),
-                        const SizedBox(height: 16),
-                        Text(
-                          moduleProvider.error!,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.grey.shade600),
-                        ),
-                        const SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed: () => moduleProvider.loadModules(),
-                          child: const Text('Retry'),
-                        ),
-                      ],
+                    child: Padding(
+                      padding: const EdgeInsets.all(32),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.cloud_off,
+                              size: 64, color: Colors.grey.shade400),
+                          const SizedBox(height: 16),
+                          const Text(
+                            'Connection Error',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Could not connect to the server.\nPlease check your settings.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: Colors.grey.shade600),
+                          ),
+                          const SizedBox(height: 24),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              ElevatedButton.icon(
+                                onPressed: () => moduleProvider.loadModules(),
+                                icon: const Icon(Icons.refresh),
+                                label: const Text('Retry'),
+                              ),
+                              const SizedBox(width: 12),
+                              OutlinedButton.icon(
+                                onPressed: () => Navigator.pushNamed(context, '/settings'),
+                                icon: const Icon(Icons.settings),
+                                label: const Text('Settings'),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   )
                 : moduleProvider.modules.isEmpty
@@ -126,6 +149,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   return _ModuleCard(
                                     name: module.displayName,
                                     description: module.description ?? '',
+                                    icon: getIconForModule(module.icon),
                                     onTap: () {
                                       moduleProvider.setCurrentModule(module);
                                       Navigator.pushNamed(
@@ -149,11 +173,13 @@ class _HomeScreenState extends State<HomeScreen> {
 class _ModuleCard extends StatelessWidget {
   final String name;
   final String description;
+  final IconData icon;
   final VoidCallback onTap;
 
   const _ModuleCard({
     required this.name,
     required this.description,
+    required this.icon,
     required this.onTap,
   });
 
@@ -174,12 +200,12 @@ class _ModuleCard extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: Colors.blue.shade100,
+                  color: Theme.of(context).colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
-                  Icons.folder_outlined,
-                  color: Colors.blue.shade700,
+                  icon,
+                  color: Theme.of(context).colorScheme.primary,
                   size: 28,
                 ),
               ),

@@ -38,7 +38,7 @@ class RecordCard extends StatelessWidget {
                     placeholder: (context, url) => Container(
                       width: 60,
                       height: 60,
-                      color: Colors.grey.shade200,
+                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
                       child: const Center(
                         child: SizedBox(
                           width: 20,
@@ -50,8 +50,8 @@ class RecordCard extends StatelessWidget {
                     errorWidget: (context, url, error) => Container(
                       width: 60,
                       height: 60,
-                      color: Colors.grey.shade200,
-                      child: const Icon(Icons.image_not_supported, size: 24),
+                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                      child: Icon(Icons.image_not_supported, size: 24, color: Theme.of(context).colorScheme.onSurfaceVariant),
                     ),
                   ),
                 )
@@ -60,12 +60,12 @@ class RecordCard extends StatelessWidget {
                   width: 60,
                   height: 60,
                   decoration: BoxDecoration(
-                    color: Colors.blue.shade100,
+                    color: Theme.of(context).colorScheme.primaryContainer,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
                     Icons.description_outlined,
-                    color: Colors.blue.shade700,
+                    color: Theme.of(context).colorScheme.onPrimaryContainer,
                   ),
                 ),
 
@@ -84,8 +84,8 @@ class RecordCard extends StatelessWidget {
                             width: 8,
                             height: 8,
                             margin: const EdgeInsets.only(right: 6),
-                            decoration: const BoxDecoration(
-                              color: Colors.blue,
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.primary,
                               shape: BoxShape.circle,
                             ),
                           ),
@@ -107,13 +107,18 @@ class RecordCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        _StatusBadge(status: record.status),
+                        Flexible(
+                          child: _StatusBadge(status: record.status),
+                        ),
                         const SizedBox(width: 8),
-                        Text(
-                          _formatDate(record.createdAt),
-                          style: TextStyle(
-                            color: Colors.grey.shade600,
-                            fontSize: 12,
+                        Flexible(
+                          child: Text(
+                            _formatDate(record.createdAt),
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              fontSize: 12,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],
@@ -123,7 +128,7 @@ class RecordCard extends StatelessWidget {
                       Text(
                         'By ${record.createdBy}',
                         style: TextStyle(
-                          color: Colors.grey.shade500,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                           fontSize: 11,
                         ),
                         maxLines: 1,
@@ -138,13 +143,13 @@ class RecordCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
                   '#${record.id}',
                   style: TextStyle(
-                    color: Colors.grey.shade600,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                   ),
@@ -152,7 +157,7 @@ class RecordCard extends StatelessWidget {
               ),
 
               const SizedBox(width: 8),
-              Icon(Icons.chevron_right, color: Colors.grey.shade400),
+              Icon(Icons.chevron_right, color: Theme.of(context).colorScheme.onSurfaceVariant),
             ],
           ),
         ),
@@ -189,7 +194,7 @@ class _StatusBadge extends StatelessWidget {
         color = Colors.orange;
         break;
       default:
-        color = Colors.blue;
+        color = Theme.of(context).colorScheme.primary;
     }
 
     return Container(

@@ -1,10 +1,16 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:image_picker/image_picker.dart';
 import '../providers/record_provider.dart';
 import '../providers/module_provider.dart';
+import '../models/module_field.dart';
 import '../config/app_config.dart';
+import '../services/api_service.dart';
+import '../services/auth_service.dart';
 
 class RecordDetailScreen extends StatefulWidget {
   const RecordDetailScreen({super.key});
@@ -16,6 +22,8 @@ class RecordDetailScreen extends StatefulWidget {
 class _RecordDetailScreenState extends State<RecordDetailScreen> {
   String? _moduleName;
   int? _recordId;
+  final ImagePicker _imagePicker = ImagePicker();
+  bool _isUploading = false;
 
   @override
   void initState() {
@@ -32,6 +40,97 @@ class _RecordDetailScreenState extends State<RecordDetailScreen> {
     });
   }
 
+  Future<void> _showImageSourcePicker() async {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Take Photo'),
+              onTap: () {
+                Navigator.pop(context);
+                _pickAndUploadImage(ImageSource.camera);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Choose from Gallery'),
+              onTap: () {
+                Navigator.pop(context);
+                _pickAndUploadImage(ImageSource.gallery);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _pickAndUploadImage(ImageSource source) async {
+    // Get services before async gap
+    final authService = context.read<AuthService>();
+    final recordProvider = context.read<RecordProvider>();
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+    XFile? pickedFile;
+
+    try {
+      pickedFile = await _imagePicker.pickImage(
+        source: source,
+        maxWidth: 1920,
+        maxHeight: 1920,
+        imageQuality: 85,
+        requestFullMetadata: false, // Better for iOS Limited Photo Access
+      );
+    } catch (e) {
+      debugPrint('Image picker error: $e');
+      scaffoldMessenger.showSnackBar(
+        SnackBar(content: Text('Could not access photos: ${e.toString()}')),
+      );
+      return;
+    }
+
+    if (pickedFile == null) {
+      debugPrint('No image selected');
+      return;
+    }
+
+    if (mounted) setState(() => _isUploading = true);
+
+    try {
+      // Read file and convert to base64
+      final bytes = await pickedFile.readAsBytes();
+      final base64Image = base64Encode(bytes);
+
+      // Determine mime type from extension
+      final ext = pickedFile.path.split('.').last.toLowerCase();
+      final mimeType = ext == 'png' ? 'image/png' : 'image/jpeg';
+      final dataUrl = 'data:$mimeType;base64,$base64Image';
+
+      // Upload image
+      final apiService = ApiService(authService);
+      await apiService.uploadImage(_moduleName!, _recordId!, dataUrl);
+
+      // Reload record to show new image
+      await recordProvider.loadRecord(_moduleName!, _recordId!);
+
+      scaffoldMessenger.showSnackBar(
+        const SnackBar(content: Text('Image uploaded successfully')),
+      );
+    } catch (e) {
+      debugPrint('Image upload error: $e');
+      scaffoldMessenger.showSnackBar(
+        SnackBar(content: Text('Failed to upload image: ${e.toString()}')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isUploading = false);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final recordProvider = context.watch<RecordProvider>();
@@ -42,7 +141,7 @@ class _RecordDetailScreenState extends State<RecordDetailScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(record?.name ?? 'Record Details'),
-        backgroundColor: Colors.blue.shade700,
+        backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Colors.white,
         actions: [
           IconButton(
@@ -61,6 +160,22 @@ class _RecordDetailScreenState extends State<RecordDetailScreen> {
           ),
         ],
       ),
+      floatingActionButton: record != null
+          ? FloatingActionButton(
+              onPressed: _isUploading ? null : _showImageSourcePicker,
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              child: _isUploading
+                  ? const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : const Icon(Icons.add_a_photo, color: Colors.white),
+            )
+          : null,
       body: recordProvider.isLoading
           ? const Center(child: CircularProgressIndicator())
           : recordProvider.error != null
@@ -202,9 +317,9 @@ class _RecordDetailScreenState extends State<RecordDetailScreen> {
                                 padding: const EdgeInsets.all(16),
                                 child: Column(
                                   children: record.data!.entries.map((entry) {
-                                    final field = module?.fields?.firstWhere(
-                                      (f) => f.name == entry.key,
-                                      orElse: () => throw Exception('Not found'),
+                                    final field = module?.fields?.cast<ModuleField?>().firstWhere(
+                                      (f) => f?.name == entry.key,
+                                      orElse: () => null,
                                     );
                                     final displayName = field?.displayName ?? entry.key;
 
@@ -311,7 +426,7 @@ class _StatusBadge extends StatelessWidget {
         color = Colors.orange;
         break;
       default:
-        color = Colors.blue;
+        color = Theme.of(context).colorScheme.primary;
     }
 
     return Container(
